@@ -1,0 +1,22 @@
+# Expert authority weights (RFC-REC-EXT-004 §2-1-2)
+# Ranking-time config, NOT SSOT — managed separately from Master
+authority_weights:
+  critic: 3.0
+  expert: 2.0
+  user: 1.0
+  anonymous: 0.5
+
+# Multi-recall quotas (RFC-INFRA-IMPL-013 §6-1)
+recall_sources:
+  - name: collaborative
+    model: bpr_v1
+    quota: 50
+  - name: content
+    model: two_tower_v1
+    quota: 50
+  - name: graph
+    model: lightgcn_v1
+    quota: 30
+  - name: popular
+    model: popularity
+    quota: 20

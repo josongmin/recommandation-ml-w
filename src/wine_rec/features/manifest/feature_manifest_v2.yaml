@@ -1,0 +1,595 @@
+# Feature Manifest v2 — Critical 40 + Important 20 features
+# RFC-FEATURE-MANIFEST-010 §1, RFC-SOTA-ROADMAP-012 §5-2 (S4)
+# Superset of v1: all 20 v1 critical features + 20 new critical + 20 important
+
+feature_set_version: "fs_v2"
+
+entities:
+  # ═══════════════════════════════════════════════
+  # User entity (11 critical + 5 important)
+  # ═══════════════════════════════════════════════
+  - entity_type: user
+    join_keys: [user_id]
+    features:
+      # ── v1 critical (7) ──
+      - name: user_price_elasticity
+        dtype: float
+        source: {table: user_profile_snapshot_v1, key: user_id, value_path: price_elasticity}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: profile_v1
+        default: "0.0"
+        null_policy: default
+        description: "User price elasticity (rolling window)"
+        tier: critical
+
+      - name: user_avg_rating
+        dtype: float
+        source: {table: user_profile_snapshot_v1, key: user_id, value_path: avg_rating}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: profile_v1
+        default: "0.0"
+        null_policy: default
+        description: "User average rating given"
+        tier: critical
+
+      - name: user_purchase_count
+        dtype: int
+        source: {table: user_profile_snapshot_v1, key: user_id, value_path: purchase_count}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: profile_v1
+        default: "0"
+        null_policy: default
+        description: "Total purchase count"
+        tier: critical
+
+      - name: user_review_count
+        dtype: int
+        source: {table: user_profile_snapshot_v1, key: user_id, value_path: review_count}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: profile_v1
+        default: "0"
+        null_policy: default
+        description: "Total review count"
+        tier: critical
+
+      - name: user_preferred_variety_top3
+        dtype: json
+        source: {table: user_profile_snapshot_v1, key: user_id, value_path: preferred_variety_top3}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: profile_v1
+        default: "[]"
+        null_policy: default
+        description: "Top 3 preferred grape varieties"
+        tier: critical
+
+      - name: user_preferred_region_top3
+        dtype: json
+        source: {table: user_profile_snapshot_v1, key: user_id, value_path: preferred_region_top3}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: profile_v1
+        default: "[]"
+        null_policy: default
+        description: "Top 3 preferred wine regions"
+        tier: critical
+
+      - name: user_taste_embedding
+        dtype: vector
+        source: {table: user_embedding_v1, key: user_id, value_path: embedding}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: embedding_v1
+        null_policy: allow_null
+        description: "User taste embedding (128-dim)"
+        tier: critical
+
+      # ── v2 critical (4) ──
+      - name: user_interaction_count
+        dtype: int
+        source: {table: user_profile_snapshot_v1, key: user_id, value_path: interaction_count}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: profile_v2
+        default: "0"
+        null_policy: default
+        description: "Total interaction count (clicks + carts + purchases)"
+        tier: critical
+
+      - name: user_avg_price_purchased
+        dtype: float
+        source: {table: user_profile_snapshot_v1, key: user_id, value_path: avg_price_purchased}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: profile_v2
+        default: "0.0"
+        null_policy: default
+        description: "Average price of purchased wines"
+        tier: critical
+
+      - name: user_days_since_last_purchase
+        dtype: int
+        source: {table: user_profile_snapshot_v1, key: user_id, value_path: days_since_last_purchase}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: profile_v2
+        default: "999"
+        null_policy: default
+        description: "Days since last purchase"
+        tier: critical
+
+      - name: user_preferred_wine_type
+        dtype: string
+        source: {table: user_profile_snapshot_v1, key: user_id, value_path: preferred_wine_type}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: profile_v2
+        default: "unknown"
+        null_policy: default
+        description: "User's most purchased wine type"
+        tier: critical
+
+      # ── v2 important (5) ──
+      - name: user_expert_affinity
+        dtype: float
+        source: {table: user_expert_affinity_v1, key: user_id, value_path: affinity_score}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: affinity_v1
+        default: "0.0"
+        null_policy: default
+        description: "How much user's preferences align with expert consensus"
+        tier: important
+
+      - name: user_temporal_preference
+        dtype: string
+        source: {table: user_profile_snapshot_v1, key: user_id, value_path: temporal_preference}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: profile_v2
+        default: "unknown"
+        null_policy: default
+        description: "User's preferred drinking stage (peak|young|aged)"
+        tier: important
+
+      - name: user_exploration_tendency
+        dtype: float
+        source: {table: user_profile_snapshot_v1, key: user_id, value_path: exploration_tendency}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: profile_v2
+        default: "0.5"
+        null_policy: default
+        description: "Tendency to explore new wines vs stay with known (0=habitual, 1=explorer)"
+        tier: important
+
+      - name: user_avg_rating_deviation
+        dtype: float
+        source: {table: user_profile_snapshot_v1, key: user_id, value_path: avg_rating_deviation}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: profile_v2
+        default: "0.0"
+        null_policy: default
+        description: "How much user's ratings deviate from expert consensus"
+        tier: important
+
+      - name: user_seasonal_preference
+        dtype: string
+        source: {table: user_profile_snapshot_v1, key: user_id, value_path: seasonal_preference}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: profile_v2
+        default: "none"
+        null_policy: default
+        description: "Seasonal purchasing pattern (summer_whites|winter_reds|none)"
+        tier: important
+
+  # ═══════════════════════════════════════════════
+  # Wine Core entity (17 critical + 8 important)
+  # ═══════════════════════════════════════════════
+  - entity_type: wine_core
+    join_keys: [wine_core_id]
+    features:
+      # ── v1 critical (7) ──
+      - name: item_core_weighted_rating_mean
+        dtype: float
+        source: {table: wine_review_aggregate_ir_v1, key: wine_core_id, value_path: weighted_rating_mean}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: aggregate_v1
+        default: "0.0"
+        null_policy: default
+        description: "Expert-weighted mean rating"
+        tier: critical
+
+      - name: item_core_critic_consensus
+        dtype: float
+        source: {table: wine_review_aggregate_ir_v1, key: wine_core_id, value_path: critic_consensus_score}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: aggregate_v1
+        default: "0.0"
+        null_policy: default
+        description: "Expert consensus score (inverse of variance)"
+        tier: critical
+
+      - name: item_core_temporal_stage
+        dtype: string
+        source: {table: wine_temporal_ir_v1, key: wine_core_id, value_path: current_stage}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: temporal_v1
+        default: "unknown"
+        null_policy: default
+        description: "Current drinking stage (too_young|early|peak|past)"
+        tier: critical
+
+      - name: item_core_peak_proximity
+        dtype: float
+        source: {table: wine_temporal_ir_v1, key: wine_core_id, value_path: confidence}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: temporal_v1
+        default: "0.0"
+        null_policy: default
+        description: "Peak drinking window proximity score"
+        tier: critical
+
+      - name: item_core_text_embedding
+        dtype: vector
+        source: {table: wine_text_ir_v1, key: wine_core_id, value_path: embedding_ref}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: text_v1
+        null_policy: allow_null
+        description: "Wine text embedding (384-dim)"
+        tier: critical
+
+      - name: item_core_variety
+        dtype: string
+        source: {table: wine_core_master_v1, key: wine_core_id, value_path: variety}
+        time_travel_rule: {rule: none, timestamp_field: updated_at}
+        recipe_version: master_v1
+        null_policy: error
+        description: "Primary grape variety"
+        tier: critical
+
+      - name: item_core_region
+        dtype: string
+        source: {table: wine_core_master_v1, key: wine_core_id, value_path: region}
+        time_travel_rule: {rule: none, timestamp_field: updated_at}
+        recipe_version: master_v1
+        null_policy: error
+        description: "Wine region"
+        tier: critical
+
+      # ── v2 critical: expert-aware (6) ──
+      - name: item_core_decay_weighted_rating_mean
+        dtype: float
+        source: {table: wine_review_aggregate_ir_v2, key: wine_core_id, value_path: decay_weighted_rating_mean}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: aggregate_v2
+        default: "0.0"
+        null_policy: default
+        description: "Authority+recency-weighted mean rating"
+        tier: critical
+
+      - name: item_core_authority_decay_score
+        dtype: float
+        source: {table: wine_review_aggregate_ir_v2, key: wine_core_id, value_path: authority_decay_score}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: aggregate_v2
+        default: "0.0"
+        null_policy: default
+        description: "Combined authority+recency weight (0-1)"
+        tier: critical
+
+      - name: item_core_consensus_category
+        dtype: string
+        source: {table: wine_review_aggregate_ir_v2, key: wine_core_id, value_path: consensus_category}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: aggregate_v2
+        default: "insufficient"
+        null_policy: default
+        description: "Expert consensus classification (high_agreement|moderate|controversial|insufficient)"
+        tier: critical
+
+      - name: item_core_expert_agreement_pct
+        dtype: float
+        source: {table: wine_review_aggregate_ir_v2, key: wine_core_id, value_path: expert_agreement_pct}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: aggregate_v2
+        default: "0.0"
+        null_policy: default
+        description: "Fraction of experts within 0.1 of weighted mean"
+        tier: critical
+
+      - name: item_core_inter_expert_variance
+        dtype: float
+        source: {table: wine_review_aggregate_ir_v2, key: wine_core_id, value_path: inter_expert_variance}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: aggregate_v2
+        default: "0.0"
+        null_policy: default
+        description: "Variance between different expert reviewers"
+        tier: critical
+
+      - name: item_core_intra_expert_variance
+        dtype: float
+        source: {table: wine_review_aggregate_ir_v2, key: wine_core_id, value_path: intra_expert_variance}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: aggregate_v2
+        default: "0.0"
+        null_policy: default
+        description: "Avg variance within same expert's reviews"
+        tier: critical
+
+      # ── v2 critical: temporal (4) ──
+      - name: item_core_days_to_peak
+        dtype: int
+        source: {table: wine_temporal_ir_v2, key: wine_core_id, value_path: days_to_peak}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: temporal_v2
+        default: "0"
+        null_policy: default
+        description: "Signed days to peak (negative=past, positive=before)"
+        tier: critical
+
+      - name: item_core_peak_trajectory
+        dtype: string
+        source: {table: wine_temporal_ir_v2, key: wine_core_id, value_path: peak_trajectory}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: temporal_v2
+        default: "unknown"
+        null_policy: default
+        description: "Peak trajectory (approaching|at_peak|declining|unknown)"
+        tier: critical
+
+      - name: item_core_merged_confidence
+        dtype: float
+        source: {table: wine_temporal_ir_v2, key: wine_core_id, value_path: merged_confidence}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: temporal_v2
+        default: "0.0"
+        null_policy: default
+        description: "Multi-method merged temporal confidence"
+        tier: critical
+
+      - name: item_core_vintage_effect
+        dtype: float
+        source: {table: wine_temporal_ir_v2, key: wine_core_id, value_path: vintage_effect_score}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: temporal_v2
+        default: "0.0"
+        null_policy: default
+        description: "Vintage quality effect on window (-1 to 1)"
+        tier: critical
+
+      # ── v2 important (8) ──
+      - name: item_core_producer
+        dtype: string
+        source: {table: wine_core_master_v1, key: wine_core_id, value_path: producer}
+        time_travel_rule: {rule: none, timestamp_field: updated_at}
+        recipe_version: master_v1
+        null_policy: error
+        description: "Producer name"
+        tier: important
+
+      - name: item_core_wine_type
+        dtype: string
+        source: {table: wine_core_master_v1, key: wine_core_id, value_path: wine_type}
+        time_travel_rule: {rule: none, timestamp_field: updated_at}
+        recipe_version: master_v1
+        null_policy: error
+        description: "Wine type (red|white|rose|sparkling|fortified|dessert)"
+        tier: important
+
+      - name: item_core_country
+        dtype: string
+        source: {table: wine_core_master_v1, key: wine_core_id, value_path: country}
+        time_travel_rule: {rule: none, timestamp_field: updated_at}
+        recipe_version: master_v1
+        null_policy: error
+        description: "Country of origin"
+        tier: important
+
+      - name: item_core_appellation
+        dtype: string
+        source: {table: wine_core_master_v1, key: wine_core_id, value_path: appellation}
+        time_travel_rule: {rule: none, timestamp_field: updated_at}
+        recipe_version: master_v1
+        default: "unknown"
+        null_policy: default
+        description: "Appellation/sub-region"
+        tier: important
+
+      - name: item_core_review_count
+        dtype: int
+        source: {table: wine_review_aggregate_ir_v2, key: wine_core_id, value_path: authority_weighted_count}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: aggregate_v2
+        default: "0"
+        null_policy: default
+        description: "Total authority-weighted review count"
+        tier: important
+
+      - name: item_core_price_quality_ratio
+        dtype: float
+        source: {table: wine_price_quality_v1, key: wine_core_id, value_path: pq_ratio}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: pq_v1
+        default: "0.0"
+        null_policy: default
+        description: "Price-to-quality ratio (expert rating / log price)"
+        tier: important
+
+      - name: item_core_discovery_score
+        dtype: float
+        source: {table: wine_discovery_v1, key: wine_core_id, value_path: discovery_score}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: discovery_v1
+        default: "0.0"
+        null_policy: default
+        description: "Discovery potential (high quality + low exposure)"
+        tier: important
+
+      - name: item_core_discrepancy_note
+        dtype: string
+        source: {table: wine_review_aggregate_ir_v2, key: wine_core_id, value_path: discrepancy_note}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: aggregate_v2
+        default: ""
+        null_policy: default
+        description: "Note about high variance among reviewers"
+        tier: important
+
+  # ═══════════════════════════════════════════════
+  # Wine SKU entity (5 critical + 4 important)
+  # ═══════════════════════════════════════════════
+  - entity_type: wine_sku
+    join_keys: [wine_sku_id]
+    features:
+      # ── v1 critical (3) ──
+      - name: item_sku_median_price
+        dtype: float
+        source: {table: wine_attr_ir_v1, key: wine_sku_id, value_path: median_price_by_market}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: attr_v1
+        default: "0.0"
+        null_policy: default
+        description: "Median price by market"
+        tier: critical
+
+      - name: item_sku_in_stock
+        dtype: bool
+        source: {table: wine_sku_inventory_v1, key: wine_sku_id, value_path: in_stock}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: inventory_v1
+        default: "false"
+        null_policy: default
+        description: "Whether SKU is currently in stock"
+        tier: critical
+
+      - name: item_sku_rarity_score
+        dtype: float
+        source: {table: wine_scarcity_ir_v1, key: wine_core_id, value_path: rarity_score}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: scarcity_v1
+        default: "0.0"
+        null_policy: default
+        description: "Rarity score (0~1)"
+        tier: critical
+
+      # ── v2 critical (2) ──
+      - name: item_sku_vintage_year
+        dtype: int
+        source: {table: wine_sku_master_v1, key: wine_sku_id, value_path: vintage_year}
+        time_travel_rule: {rule: none, timestamp_field: updated_at}
+        recipe_version: master_v1
+        default: "0"
+        null_policy: default
+        description: "Vintage year"
+        tier: critical
+
+      - name: item_sku_bottle_size_ml
+        dtype: int
+        source: {table: wine_sku_master_v1, key: wine_sku_id, value_path: bottle_size_ml}
+        time_travel_rule: {rule: none, timestamp_field: updated_at}
+        recipe_version: master_v1
+        default: "750"
+        null_policy: default
+        description: "Bottle size in ml"
+        tier: critical
+
+      # ── v2 important (4) ──
+      - name: item_sku_price_percentile
+        dtype: float
+        source: {table: wine_attr_ir_v1, key: wine_sku_id, value_path: price_percentile}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: attr_v1
+        default: "0.5"
+        null_policy: default
+        description: "Price percentile within category (0-1)"
+        tier: important
+
+      - name: item_sku_merchant
+        dtype: string
+        source: {table: wine_sku_master_v1, key: wine_sku_id, value_path: merchant}
+        time_travel_rule: {rule: none, timestamp_field: updated_at}
+        recipe_version: master_v1
+        default: "unknown"
+        null_policy: default
+        description: "Merchant name"
+        tier: important
+
+      - name: item_sku_days_since_last_restock
+        dtype: int
+        source: {table: wine_sku_inventory_v1, key: wine_sku_id, value_path: days_since_last_restock}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: inventory_v1
+        default: "999"
+        null_policy: default
+        description: "Days since last restock event"
+        tier: important
+
+      - name: item_sku_purchase_velocity
+        dtype: float
+        source: {table: wine_sku_sales_v1, key: wine_sku_id, value_path: purchase_velocity}
+        time_travel_rule: {rule: as_of_ts_le_event_ts, timestamp_field: as_of_ts}
+        recipe_version: sales_v1
+        default: "0.0"
+        null_policy: default
+        description: "Rolling 30-day purchase velocity"
+        tier: important
+
+  # ═══════════════════════════════════════════════
+  # Context entity (3 critical + 3 important)
+  # ═══════════════════════════════════════════════
+  - entity_type: context
+    join_keys: [impression_id]
+    features:
+      # ── v1 critical (2) ──
+      - name: ctx_surface
+        dtype: string
+        source: {table: impression_log_v1, key: impression_id, value_path: surface}
+        time_travel_rule: {rule: none, timestamp_field: shown_ts}
+        recipe_version: log_v1
+        null_policy: error
+        description: "Recommendation surface (home|search|detail)"
+        tier: critical
+
+      - name: ctx_request_hour
+        dtype: int
+        source: {table: impression_log_v1, key: impression_id, value_path: request_hour}
+        time_travel_rule: {rule: none, timestamp_field: shown_ts}
+        recipe_version: log_v1
+        default: "0"
+        null_policy: default
+        description: "Request hour of day (0-23)"
+        tier: critical
+
+      # ── v2 critical (1) ──
+      - name: ctx_day_of_week
+        dtype: int
+        source: {table: impression_log_v1, key: impression_id, value_path: day_of_week}
+        time_travel_rule: {rule: none, timestamp_field: shown_ts}
+        recipe_version: log_v1
+        default: "0"
+        null_policy: default
+        description: "Day of week (0=Mon, 6=Sun)"
+        tier: critical
+
+      # ── v2 important (3) ──
+      - name: ctx_session_depth
+        dtype: int
+        source: {table: impression_log_v1, key: impression_id, value_path: session_depth}
+        time_travel_rule: {rule: none, timestamp_field: shown_ts}
+        recipe_version: log_v1
+        default: "1"
+        null_policy: default
+        description: "Position in user session (1st page, 2nd page, etc.)"
+        tier: important
+
+      - name: ctx_device_type
+        dtype: string
+        source: {table: impression_log_v1, key: impression_id, value_path: device_type}
+        time_travel_rule: {rule: none, timestamp_field: shown_ts}
+        recipe_version: log_v1
+        default: "unknown"
+        null_policy: default
+        description: "Device type (mobile|desktop|tablet)"
+        tier: important
+
+      - name: ctx_referral_source
+        dtype: string
+        source: {table: impression_log_v1, key: impression_id, value_path: referral_source}
+        time_travel_rule: {rule: none, timestamp_field: shown_ts}
+        recipe_version: log_v1
+        default: "direct"
+        null_policy: default
+        description: "Referral source (direct|search|social|email)"
+        tier: important

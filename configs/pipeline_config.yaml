@@ -1,0 +1,28 @@
+# Pipeline configuration
+pipeline:
+  bronze_to_silver:
+    dedup_key: event_id
+    out_of_order_window_minutes: 5
+    cleaning_rules:
+      - deduplicate_by_event_id
+      - validate_schema_version
+      - fill_missing_timestamps
+      - remove_bot_traffic
+      - normalize_user_ids
+
+  dataset_builder:
+    label_windows:
+      purchase_days: 7
+      cart_days: 3
+      click_days: 1
+      dwell_buckets: [0, 3000, 10000, 30000]  # ms
+    negative_sampling:
+      method: shown_but_no_action
+      cap_per_pos: 10
+      seed: 42
+
+  quality_gates:
+    leakage_threshold: 0.0      # hard fail
+    join_success_threshold: 0.99
+    propensity_warn_threshold: 0.05
+    propensity_block_threshold: 0.20

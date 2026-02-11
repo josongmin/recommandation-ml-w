@@ -1,0 +1,241 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "wine-rec"
+version = "0.1.0"
+description = "High-End Wine Recommendation System"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+dependencies = [
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "polars>=1.0",
+    "pyarrow>=17.0",
+    "boto3>=1.35",
+    "structlog>=24.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+ml = [
+    "torch>=2.4",
+    "recbole>=1.2",
+    "torch-geometric>=2.6",
+    "faiss-cpu>=1.8",
+    "sentence-transformers>=3.0",
+    "numpy>=2.0",
+    "scipy>=1.14",
+    "scikit-learn>=1.5",
+]
+serving = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "httpx>=0.27",
+]
+pipeline = [
+    "pyspark>=3.5",
+    "pyiceberg>=0.7",
+]
+dev = [
+    "ruff>=0.8",
+    "basedpyright>=1.22",
+    "pre-commit>=4.0",
+    "ipython>=8.0",
+    "boto3-stubs[s3,dynamodb,sagemaker,lambda,glue,stepfunctions,kinesis]>=1.35",
+]
+test = [
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "pytest-asyncio>=0.24",
+    "pytest-xdist>=3.5",
+    "moto[s3,dynamodb,lambda,kinesis]>=5.0",
+    "hypothesis>=6.0",
+]
+all = ["wine-rec[ml,serving,pipeline,dev,test]"]
+
+[project.scripts]
+wine-rec = "wine_rec.cli:main"
+
+# ──────────────────────────────────────────────
+# Ruff — lint + format (replaces black, isort, flake8, pylint)
+# ──────────────────────────────────────────────
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["src"]
+
+[tool.ruff.lint]
+select = [
+    "F",      # pyflakes
+    "E", "W", # pycodestyle
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "A",      # flake8-builtins
+    "C4",     # flake8-comprehensions
+    "DTZ",    # flake8-datetimez
+    "T20",    # flake8-print
+    "SIM",    # flake8-simplify
+    "TCH",    # flake8-type-checking
+    "PTH",    # flake8-use-pathlib
+    "RUF",    # ruff-specific
+    "S",      # flake8-bandit (security)
+    "ANN",    # flake8-annotations
+    "ASYNC",  # flake8-async
+    "FA",     # flake8-future-annotations
+    "ISC",    # flake8-implicit-str-concat
+    "PIE",    # flake8-pie
+    "PT",     # flake8-pytest-style
+    "RSE",    # flake8-raise
+    "RET",    # flake8-return
+    "TID",    # flake8-tidy-imports
+    "ARG",    # flake8-unused-arguments
+    "PGH",    # pygrep-hooks
+    "PL",     # pylint
+    "PERF",   # perflint
+    "FURB",   # refurb (modernize)
+    "LOG",    # flake8-logging
+]
+ignore = [
+    "ANN401",  # dynamically typed Any
+    "S101",    # assert used (ok in tests)
+    "PLR0913", # too many arguments (ML configs)
+    "PLR2004", # magic value comparison
+    "ISC001",  # conflicts with ruff format
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "ANN", "ARG", "PLR", "TID251", "TC003"]
+"notebooks/**/*.py" = ["T20", "ANN", "E501"]
+"scripts/**/*.py" = ["T20", "ANN", "S311", "RUF002"]  # seed data uses random, unicode wine names
+"src/wine_rec/schemas/**/*.py" = ["TC003"]  # Pydantic needs field types at runtime
+"src/wine_rec/serving/**/*.py" = ["TID251"]  # serving imports own submodules
+"src/wine_rec/models/**/*.py" = ["TID251"]  # models import own submodules
+"src/wine_rec/cli.py" = ["TID251"]  # CLI imports all submodules
+
+[tool.ruff.lint.isort]
+known-first-party = ["wine_rec"]
+force-single-line = false
+lines-after-imports = 2
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+# ── Module boundary enforcement ──
+# serving/ingestion/models must NOT import pipeline internals
+"wine_rec.pipeline.bronze_to_silver".msg = "Module boundary: do not import pipeline internals from serving/ingestion/models"
+"wine_rec.pipeline.silver_to_gold_a".msg = "Module boundary: do not import pipeline internals"
+"wine_rec.pipeline.gold_a_to_gold_b".msg = "Module boundary: do not import pipeline internals"
+"wine_rec.pipeline.dataset_builder".msg = "Module boundary: do not import pipeline internals"
+# models must NOT import serving
+"wine_rec.serving.app".msg = "Module boundary: models must not import serving"
+"wine_rec.serving.recommender".msg = "Module boundary: models must not import serving"
+# ingestion must NOT import models
+"wine_rec.models".msg = "Module boundary: ingestion must not import models"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+# ──────────────────────────────────────────────
+# basedpyright — strict type checking (faster than mypy)
+# ──────────────────────────────────────────────
+[tool.basedpyright]
+pythonVersion = "3.11"
+pythonPlatform = "All"
+typeCheckingMode = "strict"
+reportMissingImports = true
+reportMissingTypeStubs = false
+reportUnusedImport = false           # ruff handles this
+reportUnusedVariable = false         # ruff handles this
+reportUnnecessaryTypeIgnoreComment = true
+reportMissingParameterType = true
+reportMissingTypeArgument = true
+# Third-party stub gaps (boto3, structlog, etc.) — warn, don't error
+reportUnknownParameterType = "warning"
+reportUnknownArgumentType = "warning"
+reportUnknownVariableType = "warning"
+reportUnknownMemberType = "warning"
+reportUntypedFunctionDecorator = true
+reportUntypedClassDecorator = true
+reportUntypedBaseClass = "warning"   # pydantic-settings BaseSettings
+reportUntypedNamedTuple = true
+reportPrivateUsage = true
+reportConstantRedefinition = true
+reportIncompatibleMethodOverride = true
+reportIncompatibleVariableOverride = true
+reportInconsistentConstructor = true
+reportOverlappingOverload = true
+reportUninitializedInstanceVariable = true
+reportCallInDefaultInitializer = false  # FastAPI Depends() pattern
+reportUnnecessaryIsInstance = true
+reportUnnecessaryCast = true
+reportUnnecessaryComparison = true
+reportSelfClsParameterName = true
+reportImplicitStringConcatenation = true
+reportUnusedCallResult = false       # structlog + boto3 return values
+reportUnusedExpression = true
+strictListInference = true
+strictDictionaryInference = true
+strictSetInference = true
+strictParameterNoneValue = true
+venvPath = "."
+venv = ".venv"
+
+# ──────────────────────────────────────────────
+# Pytest
+# ──────────────────────────────────────────────
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "-ra",
+    "--tb=short",
+    "--cov=wine_rec",
+    "--cov-report=term-missing:skip-covered",
+    "--cov-fail-under=55",  # stub modules (infra/serving/models) lower coverage; raise as implementation fills in
+]
+markers = [
+    "unit: fast isolated unit tests",
+    "integration: tests requiring AWS mocks",
+    "e2e: end-to-end pipeline tests",
+    "slow: tests that take > 10s",
+    "gpu: tests requiring GPU",
+]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning:botocore.*",
+    "ignore::DeprecationWarning:pydantic.*",
+]
+
+# ──────────────────────────────────────────────
+# Coverage
+# ──────────────────────────────────────────────
+[tool.coverage.run]
+source = ["wine_rec"]
+branch = true
+omit = ["*/tests/*", "*/notebooks/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.",
+    "@overload",
+    "raise NotImplementedError",
+]
+
+# ──────────────────────────────────────────────
+# Hatch
+# ──────────────────────────────────────────────
+[tool.hatch.build.targets.wheel]
+packages = ["src/wine_rec"]

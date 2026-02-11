@@ -1,0 +1,29 @@
+name: Parity Gate
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * *"  # Daily 6AM UTC
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  parity-check:
+    name: Feature Parity (Online vs Offline)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install deps
+        run: uv pip install -e ".[dev,test]" --system
+
+      - name: Run parity check
+        run: python -m wine_rec.features.parity_checker
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          S3_BUCKET: ${{ vars.S3_BUCKET }}
