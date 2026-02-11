@@ -301,9 +301,56 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "data" {
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "data" {
+resource "aws_s3_bucket_lifecycle_configuration" "data" {
   bucket = aws_s3_bucket.data.id
 
+  rule {
+    id     = "gold-tiering"
+    status = "Enabled"
+    filter {
+      prefix = "gold/"
+    }
+    transition {
+      days          = 90
+      storage_class = "STANDARD_IA"
+    }
+    transition {
+      days          = 365
+      storage_class = "GLACIER_IR"
+    }
+  }
+
+  rule {
+    id     = "logs-tiering"
+    status = "Enabled"
+    filter {
+      prefix = "logs/"
+    }
+    transition {
+      days          = 30
+      storage_class = "STANDARD_IA"
+    }
+    transition {
+      days          = 180
+      storage_class = "GLACIER_IR"
+    }
+  }
+
+  rule {
+    id     = "artifacts-archive"
+    status = "Enabled"
+    filter {
+      prefix = "artifacts/"
+    }
+    transition {
+      days          = 365
+      storage_class = "GLACIER_IR"
+    }
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "data" {
+  bucket                  = aws_s3_bucket.data.id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true

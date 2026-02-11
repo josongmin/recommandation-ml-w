@@ -25,6 +25,10 @@ provider "aws" {
   }
 }
 
+variable "aws_region" {
+  default = "ap-northeast-2"
+}
+
 module "storage" {
   source = "../../modules/storage"
 
@@ -58,4 +62,11 @@ module "pipeline" {
   environment    = var.environment
   glue_role_arn  = module.storage.iam_glue_role_arn
   s3_bucket_name = module.storage.s3_bucket_name
+}
+
+module "kinesis" {
+  source       = "../../modules/kinesis"
+  project      = "wine-rec"
+  env          = "dev"
+  stream_name  = "wine-events-stream"
 }
