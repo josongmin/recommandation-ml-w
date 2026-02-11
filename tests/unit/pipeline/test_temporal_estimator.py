@@ -63,16 +63,33 @@ class TestEstimateRuleBased:
 
 
 class TestEstimateModelBased:
-    def test_returns_none(self):
+    def test_heuristic_estimation(self):
+        """Test model-based uses heuristic until ML model trained."""
         result = estimate_model_based(
             wine_type="red",
             variety="Pinot Noir",
             region="Burgundy",
             vintage_year=2015,
-            review_signals={},
+            review_signals={"avg_score": 92.0, "n_reviews": 100, "score_variance": 3.0},
             reference_year=2026,
         )
-        assert result is None
+        assert result is not None
+        assert result.method == "model"
+        assert result.confidence > 0.7  # High score + many reviews
+        assert result.drink_from_year < result.drink_to_year
+
+    def test_low_quality_wine_shorter_window(self):
+        """Test low-scored wines get shorter drinking windows."""
+        result = estimate_model_based(
+            wine_type="red",
+            variety="Merlot",
+            region="Unknown",
+            vintage_year=2020,
+            review_signals={"avg_score": 78.0, "n_reviews": 10},
+            reference_year=2026,
+        )
+        assert result is not None
+        assert result.confidence < 0.7  # Lower confidence for low quality
 
 
 class TestEstimateExpertBased:

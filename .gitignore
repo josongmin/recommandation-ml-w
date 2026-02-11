@@ -1,85 +1,28 @@
-# ── Python ──
+# Terraform
+*.tfstate
+*.tfstate.*
+*.tfplan
+.terraform/
+.terraform.lock.hcl
+
+# Lambda
+lambda_deployment.zip
+lambda_package/
+
+# Python
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
+*.pyc
+*.pyo
 *.egg-info/
-dist/
-build/
-*.egg
-.eggs/
+.pytest_cache/
+.coverage
+htmlcov/
 
-# ── Virtual environments ──
-.venv/
-venv/
-env/
-.conda/
-
-# ── IDE ──
-.idea/
+# IDE
 .vscode/
+.idea/
 *.swp
 *.swo
-*~
-.DS_Store
 
-# ── Testing / Coverage ──
-.pytest_cache/
-htmlcov/
-.coverage
-.coverage.*
-coverage.xml
-*.cover
-
-# ── Mypy ──
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# ── Ruff ──
-.ruff_cache/
-
-# ── Jupyter ──
-.ipynb_checkpoints/
-*.ipynb_checkpoints
-
-# ── Terraform ──
-infra/terraform/.terraform/
-infra/terraform/*.tfstate
-infra/terraform/*.tfstate.backup
-infra/terraform/.terraform.lock.hcl
-infra/terraform/**/.terraform/
-infra/terraform/**/*.tfstate
-
-# ── Docker ──
-*.log
-
-# ── Secrets / env ──
-.env
-.env.local
-.env.*.local
-secrets/
-credentials/
-*.pem
-*.key
-
-# ── Data (large files) ──
-data/
-*.parquet
-*.csv
-!tests/fixtures/**/*.parquet
-!tests/fixtures/**/*.csv
-
-# ── Model artifacts ──
-*.pt
-*.pth
-*.onnx
-*.bin
-!tests/fixtures/**/*.pt
-
-# ── AWS ──
-.aws/
-
-# ── OS ──
-Thumbs.db
+# OS
 .DS_Store

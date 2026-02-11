@@ -213,7 +213,7 @@ def _pick_weighted(items: list[str], weights: list[float]) -> str:
     return random.choices(items, weights=weights, k=1)[0]
 
 
-def generate_wine_cores(n: int = 120) -> pl.DataFrame:
+def generate_wine_cores(n: int = 500) -> pl.DataFrame:
     """Generate wine core master data."""
     rows = []
     for i in range(n):
@@ -252,7 +252,7 @@ def generate_wine_cores(n: int = 120) -> pl.DataFrame:
     return pl.DataFrame(rows)
 
 
-def generate_wine_skus(cores_df: pl.DataFrame, avg_skus_per_core: float = 2.0) -> pl.DataFrame:
+def generate_wine_skus(cores_df: pl.DataFrame, avg_skus_per_core: float = 3.5) -> pl.DataFrame:
     """Generate wine SKU master data (vintage × merchant variants)."""
     rows = []
     core_ids = cores_df["wine_core_id"].to_list()
@@ -276,7 +276,7 @@ def generate_wine_skus(cores_df: pl.DataFrame, avg_skus_per_core: float = 2.0) -
     return pl.DataFrame(rows)
 
 
-def generate_authors(n_critics: int = 8, n_experts: int = 15, n_users: int = 180) -> pl.DataFrame:
+def generate_authors(n_critics: int = 20, n_experts: int = 50, n_users: int = 1500) -> pl.DataFrame:
     """Generate author/reviewer profiles."""
     rows = [
         *[{"author_id": f"critic_{i:03d}", "author_type": "critic"} for i in range(n_critics)],
@@ -289,7 +289,7 @@ def generate_authors(n_critics: int = 8, n_experts: int = 15, n_users: int = 180
 def generate_reviews(
     cores_df: pl.DataFrame,
     authors_df: pl.DataFrame,
-    n: int = 600,
+    n: int = 5000,
 ) -> pl.DataFrame:
     """Generate review master data."""
     rows = []
@@ -337,7 +337,7 @@ def generate_reviews(
     return pl.DataFrame(rows)
 
 
-def generate_user_profiles(n: int = 200) -> pl.DataFrame:
+def generate_user_profiles(n: int = 2000) -> pl.DataFrame:
     """Generate user profile data for feature engineering."""
     all_varieties = VARIETIES_BY_TYPE["red"] + VARIETIES_BY_TYPE["white"]
     all_regions = list({r["region"] for regions in COUNTRIES_REGIONS.values() for r in regions})
@@ -362,7 +362,7 @@ def generate_user_profiles(n: int = 200) -> pl.DataFrame:
 def generate_events(
     skus_df: pl.DataFrame,
     user_profiles_df: pl.DataFrame,
-    n_impressions: int = 2000,
+    n_impressions: int = 15000,
 ) -> tuple[pl.DataFrame, pl.DataFrame, pl.DataFrame, pl.DataFrame]:
     """Generate event logs: impressions, actions, orders, policy logs."""
     sku_rows = skus_df.to_dicts()
@@ -596,10 +596,10 @@ def main() -> None:
 
     # ── Masters (Gold-A) ──
     print("[Gold-A] Master data")
-    cores = generate_wine_cores(120)
-    skus = generate_wine_skus(cores, avg_skus_per_core=2.0)
-    authors = generate_authors()
-    reviews = generate_reviews(cores, authors, n=600)
+    cores = generate_wine_cores(500)
+    skus = generate_wine_skus(cores, avg_skus_per_core=3.5)
+    authors = generate_authors(n_critics=20, n_experts=50, n_users=1500)
+    reviews = generate_reviews(cores, authors, n=5000)
 
     write_parquet(cores, out / "gold_a" / "wine_core_master_v1" / "data.parquet")
     write_parquet(skus, out / "gold_a" / "wine_sku_master_v1" / "data.parquet")
@@ -607,7 +607,7 @@ def main() -> None:
 
     # ── User profiles ──
     print("\n[Profiles] User data")
-    profiles = generate_user_profiles(200)
+    profiles = generate_user_profiles(2000)
     write_parquet(profiles, out / "profiles" / "user_profile_v1" / "data.parquet")
 
     # ── Bronze events ──
@@ -615,7 +615,7 @@ def main() -> None:
     impressions, action_events, order_events, policy_events = generate_events(
         skus,
         profiles,
-        n_impressions=2000,
+        n_impressions=15000,
     )
     write_parquet(impressions, out / "bronze" / "impression_log_v1" / "data.parquet")
     write_parquet(action_events, out / "bronze" / "action_log_v1" / "data.parquet")

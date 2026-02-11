@@ -1,6 +1,6 @@
-# wine-rec
+# rec-ml
 
-High-End Wine Recommendation System.
+Production-Grade ML Recommendation System.
 
 ## Quick Start
 
@@ -37,6 +37,23 @@ src/wine_rec/
 ├── serving/      # FastAPI recommendation API
 └── common/       # Config, logging
 ```
+
+## E2E Pipeline
+
+**Phase 1-2: Data Collection & ETL** (Automated)
+- API Gateway → Lambda → Kinesis → Firehose → S3 Bronze (Real-time)
+- EventBridge (daily 01:00 UTC) → Step Functions → Glue Jobs (Bronze→Silver→Gold-A→Gold-B→Dataset)
+
+**Phase 3-4: Training & Feature Materialization** (scripts/)
+```bash
+scripts/e2e_training.sh           # Full training pipeline
+scripts/deploy_serving.sh v1      # Deploy serving (Fargate + ALB)
+```
+
+**Phase 5-6: Serving** (Deployed)
+- Client → ALB → Fargate (Feature lookup + Model inference + ANN search)
+
+See [/tmp/e2e_pipeline.md](/tmp/e2e_pipeline.md) for detailed flow.
 
 ## Tech Stack
 

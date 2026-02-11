@@ -8,24 +8,54 @@ terraform {
     }
   }
 
-  # Remote state — uncomment when ready
-  # backend "s3" {
-  #   bucket = "wine-rec-terraform-state"
-  #   key    = "dev/terraform.tfstate"
-  #   region = "ap-northeast-2"
-  # }
+  backend "local" {
+    path = "terraform.tfstate"
+  }
 }
 
 provider "aws" {
   region = var.aws_region
-}
 
-variable "aws_region" {
-  default = "ap-northeast-2"
+  default_tags {
+    tags = {
+      Project     = var.project_name
+      Environment = var.environment
+      ManagedBy   = "Terraform"
+    }
+  }
 }
 
 module "storage" {
-  source  = "../../modules/storage"
-  project = "wine-rec"
-  env     = "dev"
+  source = "../../modules/storage"
+
+  project_name = var.project_name
+  environment  = var.environment
+  aws_region   = var.aws_region
+}
+
+module "feature_store" {
+  source = "../../modules/feature_store"
+
+  project_name = var.project_name
+  environment  = var.environment
+}
+
+module "ingestion" {
+  source = "../../modules/ingestion"
+
+  project_name          = var.project_name
+  environment           = var.environment
+  lambda_role_arn       = module.storage.iam_lambda_role_arn
+  s3_bucket_arn         = module.storage.s3_bucket_arn
+  glue_catalog_database = module.storage.glue_catalog_database
+  lambda_zip_path       = "${path.root}/../../../../lambda_deployment.zip"
+}
+
+module "pipeline" {
+  source = "../../modules/pipeline"
+
+  project_name   = var.project_name
+  environment    = var.environment
+  glue_role_arn  = module.storage.iam_glue_role_arn
+  s3_bucket_name = module.storage.s3_bucket_name
 }

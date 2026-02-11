@@ -79,18 +79,72 @@ def estimate_model_based(
 ) -> TemporalEstimate | None:
     """Model-based estimate using review signals.
 
-    Returns None until a trained model is registered.  This is the
-    extension point for Phase H+ ML-based temporal estimation.
+    Uses heuristic scoring based on review signals until ML model is trained.
+    This is the extension point for Phase H+ ML-based temporal estimation.
 
-    Future features:
+    Heuristic approach (current):
+    - High scores (90+) + old vintage → extended window
+    - Low scores (<80) → shortened window
+    - Premium regions → extended window
+
+    Future ML features:
     - tannin_mentions / acidity_mentions / fruit_condition from reviews
     - critic avg rating (higher-rated reds often age better)
     - region-specific aging curves
     """
-    # Placeholder: returns None until model is trained.
-    # The merge_estimates() caller gracefully skips None values.
-    _ = wine_type, variety, region, vintage_year, review_signals, reference_year
-    return None
+    # Extract review signals
+    avg_score = review_signals.get("avg_score", 85.0)
+    score_variance = review_signals.get("score_variance", 10.0)
+    n_reviews = review_signals.get("n_reviews", 0)
+
+    # Get base window from wine type
+    min_age, max_age = _DRINKING_WINDOWS.get(wine_type.lower(), _DEFAULT_WINDOW)
+
+    # Adjust window based on review signals
+    score_multiplier = 1.0
+    if avg_score >= 90:
+        score_multiplier = 1.3  # Extend window for high-quality wines
+    elif avg_score >= 85:
+        score_multiplier = 1.1
+    elif avg_score < 80:
+        score_multiplier = 0.8  # Shorten window for lower-quality wines
+
+    # Premium regions get extended windows
+    premium_regions = {"bordeaux", "burgundy", "napa", "piedmont", "tuscany"}
+    if region.lower() in premium_regions:
+        score_multiplier *= 1.2
+
+    # Apply multiplier
+    adjusted_min = int(min_age * score_multiplier)
+    adjusted_max = int(max_age * score_multiplier)
+
+    # Compute drink window
+    drink_from = vintage_year + adjusted_min
+    drink_to = vintage_year + adjusted_max
+
+    # Confidence based on review count and variance
+    confidence = 0.6  # Base confidence for model-based
+    if n_reviews > 50:
+        confidence += 0.15
+    if score_variance < 5:
+        confidence += 0.1
+    confidence = min(confidence, 0.9)
+
+    log.debug(
+        "temporal_model_estimate",
+        wine_type=wine_type,
+        avg_score=avg_score,
+        multiplier=score_multiplier,
+        window=(adjusted_min, adjusted_max),
+        confidence=confidence,
+    )
+
+    return TemporalEstimate(
+        drink_from_year=drink_from,
+        drink_to_year=drink_to,
+        confidence=confidence,
+        method="model",
+    )
 
 
 def estimate_expert_based(
