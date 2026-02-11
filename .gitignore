@@ -80,6 +80,9 @@ data/
 # ── AWS ──
 .aws/
 
+# ── Terraform binary (project-local) ──
+.bin/
+
 # ── OS ──
 Thumbs.db
 .DS_Store

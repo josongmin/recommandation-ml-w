@@ -17,11 +17,11 @@ class Settings(BaseSettings):
     s3_bucket: str = "wine-rec-dev-data"
 
     # DynamoDB
-    dynamodb_features_table: str = "features_online_v1"
-    dynamodb_user_profile_table: str = "user_profile_v1"
+    dynamodb_features_table: str = "wine-rec-dev-features-online-v1"
+    dynamodb_user_profile_table: str = "wine-rec-dev-user-profile-v1"
 
     # Kinesis
-    kinesis_stream_name: str = "wine-events-stream"
+    kinesis_stream_name: str = "wine-rec-dev-wine-events-stream"
 
     # App
     env: str = "dev"

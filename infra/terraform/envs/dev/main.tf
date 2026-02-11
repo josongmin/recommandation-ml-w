@@ -22,10 +22,23 @@ provider "aws" {
 
 variable "aws_region" {
   default = "ap-northeast-2"
-}
+}     
 
 module "storage" {
   source  = "../../modules/storage"
   project = "wine-rec"
   env     = "dev"
+}
+
+module "feature_store" {
+  source  = "../../modules/feature_store"
+  project = "wine-rec"
+  env     = "dev"
+}
+
+module "kinesis" {
+  source       = "../../modules/kinesis"
+  project      = "wine-rec"
+  env          = "dev"
+  stream_name  = "wine-events-stream"
 }
