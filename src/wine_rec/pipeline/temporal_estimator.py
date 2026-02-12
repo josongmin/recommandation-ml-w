@@ -71,11 +71,11 @@ def estimate_rule_based(
 def estimate_model_based(
     *,
     wine_type: str,
-    variety: str,
+    variety: str,  # noqa: ARG001 - reserved for future ML model
     region: str,
     vintage_year: int,
     review_signals: dict[str, float],
-    reference_year: int,
+    reference_year: int,  # noqa: ARG001 - reserved for future ML model
 ) -> TemporalEstimate | None:
     """Model-based estimate using review signals.
 

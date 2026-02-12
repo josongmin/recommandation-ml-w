@@ -9,4 +9,3 @@ Canonical document:
 Notes:
 - This file intentionally contains no duplicated body text.
 - Use the canonical document above for the full SSOT/IR spec.
-

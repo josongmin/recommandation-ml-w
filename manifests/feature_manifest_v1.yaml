@@ -1,0 +1,197 @@
+feature_set_version: "v1.0"
+generated_at: "2024-02-12T00:00:00Z"
+
+entities:
+  # User Features (10 critical)
+  - name: user_age
+    table: user_profile_v1
+    column: age
+    type: numerical
+    critical: true
+    time_travel_rule:
+      rule: none
+      timestamp_field: null
+
+  - name: user_country
+    table: user_profile_v1
+    column: country
+    type: categorical
+    critical: true
+    time_travel_rule:
+      rule: none
+      timestamp_field: null
+
+  - name: user_total_orders
+    table: user_profile_v1
+    column: total_orders
+    type: numerical
+    critical: true
+    time_travel_rule:
+      rule: none
+      timestamp_field: null
+
+  - name: user_avg_order_value
+    table: user_profile_v1
+    column: avg_order_value
+    type: numerical
+    critical: true
+    time_travel_rule:
+      rule: none
+      timestamp_field: null
+
+  - name: user_wine_preference
+    table: user_profile_v1
+    column: wine_preference
+    type: categorical
+    critical: true
+    time_travel_rule:
+      rule: none
+      timestamp_field: null
+
+  # Wine Features (10 critical)
+  - name: wine_type
+    table: wine_sku_attr_ir_v1
+    column: wine_type
+    type: categorical
+    critical: true
+    time_travel_rule:
+      rule: point_in_time
+      timestamp_field: as_of_ts
+
+  - name: wine_region
+    table: wine_sku_attr_ir_v1
+    column: region
+    type: categorical
+    critical: true
+    time_travel_rule:
+      rule: point_in_time
+      timestamp_field: as_of_ts
+
+  - name: wine_vintage
+    table: wine_sku_attr_ir_v1
+    column: vintage_year
+    type: numerical
+    critical: true
+    time_travel_rule:
+      rule: point_in_time
+      timestamp_field: as_of_ts
+
+  - name: wine_price
+    table: wine_sku_attr_ir_v1
+    column: median_price_by_market
+    type: numerical
+    critical: true
+    time_travel_rule:
+      rule: point_in_time
+      timestamp_field: as_of_ts
+
+  - name: wine_in_stock
+    table: wine_sku_attr_ir_v1
+    column: in_stock
+    type: boolean
+    critical: true
+    time_travel_rule:
+      rule: point_in_time
+      timestamp_field: as_of_ts
+
+  # Wine Review Features (5 critical)
+  - name: wine_rating_mean
+    table: wine_review_aggregate_ir_v1
+    column: weighted_rating_mean
+    type: numerical
+    critical: true
+    time_travel_rule:
+      rule: point_in_time
+      timestamp_field: as_of_ts
+
+  - name: wine_authority_count
+    table: wine_review_aggregate_ir_v1
+    column: authority_weighted_count
+    type: numerical
+    critical: true
+    time_travel_rule:
+      rule: point_in_time
+      timestamp_field: as_of_ts
+
+  - name: wine_critic_consensus
+    table: wine_review_aggregate_ir_v1
+    column: critic_consensus_score
+    type: numerical
+    critical: true
+    time_travel_rule:
+      rule: point_in_time
+      timestamp_field: as_of_ts
+
+  # Wine Scarcity Features (3 critical)
+  - name: wine_production_volume
+    table: wine_scarcity_ir_v1
+    column: production_volume_est
+    type: numerical
+    critical: true
+    time_travel_rule:
+      rule: none
+      timestamp_field: null
+
+  - name: wine_rarity_score
+    table: wine_scarcity_ir_v1
+    column: rarity_score
+    type: numerical
+    critical: true
+    time_travel_rule:
+      rule: none
+      timestamp_field: null
+
+  # Wine Temporal Features (2 critical)
+  - name: wine_drink_from_year
+    table: wine_temporal_ir_v1
+    column: drink_from_year
+    type: numerical
+    critical: true
+    time_travel_rule:
+      rule: point_in_time
+      timestamp_field: as_of_ts
+
+  - name: wine_drink_to_year
+    table: wine_temporal_ir_v1
+    column: drink_to_year
+    type: numerical
+    critical: true
+    time_travel_rule:
+      rule: point_in_time
+      timestamp_field: as_of_ts
+
+  # Context Features (3 non-critical)
+  - name: context_season
+    table: null
+    column: season
+    type: categorical
+    critical: false
+    time_travel_rule:
+      rule: none
+      timestamp_field: null
+
+  - name: context_day_of_week
+    table: null
+    column: day_of_week
+    type: categorical
+    critical: false
+    time_travel_rule:
+      rule: none
+      timestamp_field: null
+
+  - name: context_hour
+    table: null
+    column: hour
+    type: numerical
+    critical: false
+    time_travel_rule:
+      rule: none
+      timestamp_field: null
+
+# Feature Statistics (for validation)
+statistics:
+  total_features: 20
+  critical_features: 17
+  user_features: 5
+  wine_features: 12
+  context_features: 3

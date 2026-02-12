@@ -100,23 +100,56 @@ select = [
     "PERF",   # perflint
     "FURB",   # refurb (modernize)
     "LOG",    # flake8-logging
+    "FLY",    # flynt (f-string conversion)
+    "Q",      # flake8-quotes
+    "COM",    # flake8-commas
+    "ERA",    # eradicate (commented-out code)
+    "FBT",    # flake8-boolean-trap
+    "ICN",    # flake8-import-conventions
+    "INP",    # flake8-no-pep420 (require __init__.py)
+    "INT",    # flake8-gettext
+    "G",      # flake8-logging-format
+    "EM",     # flake8-errmsg
+    "EXE",    # flake8-executable
+    "SLOT",   # flake8-slots
+    "TD",     # flake8-todos
+    "FIX",    # flake8-fixme
 ]
 ignore = [
     "ANN401",  # dynamically typed Any
     "S101",    # assert used (ok in tests)
     "PLR0913", # too many arguments (ML configs)
     "PLR2004", # magic value comparison
+    "PLR0915", # too many statements
     "ISC001",  # conflicts with ruff format
+    "COM812",  # conflicts with ruff format
+    "TD002",   # missing todo author
+    "TD003",   # missing todo link
+    "FIX002",  # todos/fixmes allowed
+    "EM101",   # exception string in variable
+    "EM102",   # f-string in exception
+    "FBT001",  # boolean positional arg
+    "FBT002",  # boolean default arg
+    "FBT003",  # boolean positional value
+    "PLC0415", # lazy imports are ok
+    "DTZ005",  # datetime.now() without tz (logging timestamps)
+    "S324",    # md5 for hashing (not crypto)
+    "S301",    # pickle (model serialization)
+    "S110",    # try-except-pass (acceptable for optional dependencies)
+    "PERF401", # manual list comprehension (readability over perf)
+    "TID251",  # banned-api (enforced by architecture lint)
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["S101", "ANN", "ARG", "PLR", "TID251", "TC003"]
+"tests/**/*.py" = ["S101", "ANN", "ARG", "PLR", "TID251", "TC003", "PT012", "SIM", "RUF043", "ERA001"]
 "notebooks/**/*.py" = ["T20", "ANN", "E501"]
-"scripts/**/*.py" = ["T20", "ANN", "S311", "RUF002"]  # seed data uses random, unicode wine names
-"src/wine_rec/schemas/**/*.py" = ["TC003"]  # Pydantic needs field types at runtime
-"src/wine_rec/serving/**/*.py" = ["TID251"]  # serving imports own submodules
-"src/wine_rec/models/**/*.py" = ["TID251"]  # models import own submodules
-"src/wine_rec/cli.py" = ["TID251"]  # CLI imports all submodules
+"scripts/**/*.py" = ["T20", "ANN", "S311", "RUF002", "INP001", "S607", "S603", "PLW1510"]
+"src/wine_rec/schemas/**/*.py" = ["TC003"]
+"src/wine_rec/serving/**/*.py" = ["TID251"]
+"src/wine_rec/models/**/*.py" = ["TID251"]
+"src/wine_rec/cli.py" = ["TID251"]
+"tests/unit/infra/**/*.py" = ["INP001"]
+"tests/e2e/**/*.py" = ["S311"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["wine_rec"]

@@ -45,12 +45,16 @@ lock:
 # Quality — lint, format, type-check
 # ════════════════════════════════════════════════
 
-# Run all checks (lint + typecheck)
-check: lint typecheck
+# Run all checks (lint + typecheck + architecture)
+check: lint typecheck lint-arch
 
 # Lint with ruff
 lint:
     uv run ruff check src/ tests/ scripts/
+
+# Lint architecture (module boundaries)
+lint-arch:
+    uv run python scripts/lint_architecture.py
 
 # Format with ruff
 fmt:
@@ -146,6 +150,10 @@ serve:
 # Run benchmark suite
 benchmark:
     uv run python -m wine_rec.models.evaluation.evaluator
+
+# Run E2E scenario (Mock-based, no AWS required)
+e2e:
+    uv run python scripts/run_e2e_scenario.py
 
 # ════════════════════════════════════════════════
 # Data Pipeline (원클릭 세팅/재세팅)

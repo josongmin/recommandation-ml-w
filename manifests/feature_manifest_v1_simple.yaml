@@ -1,0 +1,70 @@
+feature_set_version: "v1.0"
+generated_at: "2024-02-12T00:00:00Z"
+
+entities:
+  - entity_type: "user"
+    join_keys: ["user_id"]
+    features:
+      - name: "user_age"
+        dtype: "int"
+        source:
+          table: "user_profile_v1"
+          key: "user_id"
+          value_path: "age"
+        time_travel_rule:
+          rule: "none"
+          timestamp_field: ""
+        recipe_version: "v1"
+        tier: "critical"
+        description: "User age in years"
+
+      - name: "user_country"
+        dtype: "string"
+        source:
+          table: "user_profile_v1"
+          key: "user_id"
+          value_path: "country"
+        time_travel_rule:
+          rule: "none"
+          timestamp_field: ""
+        recipe_version: "v1"
+        tier: "critical"
+
+  - entity_type: "wine_sku"
+    join_keys: ["wine_sku_id"]
+    features:
+      - name: "wine_type"
+        dtype: "string"
+        source:
+          table: "wine_sku_attr_ir_v1"
+          key: "wine_sku_id"
+          value_path: "wine_type"
+        time_travel_rule:
+          rule: "as_of_ts_le_event_ts"
+          timestamp_field: "as_of_ts"
+        recipe_version: "v1"
+        tier: "critical"
+
+      - name: "wine_price"
+        dtype: "float"
+        source:
+          table: "wine_sku_attr_ir_v1"
+          key: "wine_sku_id"
+          value_path: "median_price_by_market"
+        time_travel_rule:
+          rule: "as_of_ts_le_event_ts"
+          timestamp_field: "as_of_ts"
+        recipe_version: "v1"
+        tier: "critical"
+
+      - name: "wine_rarity_score"
+        dtype: "float"
+        source:
+          table: "wine_scarcity_ir_v1"
+          key: "wine_core_id"
+          value_path: "rarity_score"
+        time_travel_rule:
+          rule: "none"
+          timestamp_field: ""
+        recipe_version: "v1"
+        tier: "critical"

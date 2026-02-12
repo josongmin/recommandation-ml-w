@@ -333,4 +333,3 @@ Partition: event_date=DATE(as_of_ts)
 
 - RFC-SSOT-IR-001의 “IR”는 추천/검색 표현층 전반을 의미한다.
 - 본 문서(RFC-IR-SCHEMA-007)의 “Gold-A Canonical IR”는 **임베딩/피처 생성 입력의 SSOT**로, RFC-SSOT-IR-001의 IR 철학(재생성 가능/버전드)과 동일하되, 실무적으로 “임베딩 이전 데이터의 자리”를 명시하기 위해 분리 표기한다.
-

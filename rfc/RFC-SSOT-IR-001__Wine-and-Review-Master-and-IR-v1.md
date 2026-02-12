@@ -223,4 +223,3 @@ barcode/sku 명시 > producer+exact name+vintage > producer+name(core) > fuzzy+r
 매핑 실패는 허용하되 candidate list를 남기고 후행 backfill 경로를 보장함
 
 하이엔드 와인추천을 위한 데이터셋 정리중임. 의견있나
-

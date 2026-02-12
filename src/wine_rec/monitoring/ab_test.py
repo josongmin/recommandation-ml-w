@@ -330,7 +330,7 @@ class ABTest:
         if not metric_a.values or not metric_b.values:
             return 1.0
 
-        u_stat, p_value = mannwhitneyu(
+        _u_stat, p_value = mannwhitneyu(
             metric_a.values,
             metric_b.values,
             alternative="two-sided",

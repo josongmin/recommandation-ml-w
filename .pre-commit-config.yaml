@@ -37,6 +37,16 @@ repos:
         types: [python]
         pass_filenames: false
 
+  # ── Architecture lint ──
+  - repo: local
+    hooks:
+      - id: architecture-lint
+        name: architecture-lint
+        entry: uv run python scripts/lint_architecture.py
+        language: system
+        types: [python]
+        pass_filenames: false
+
   # ── Terraform fmt ──
   - repo: https://github.com/antonbabenko/pre-commit-terraform
     rev: v1.96.2

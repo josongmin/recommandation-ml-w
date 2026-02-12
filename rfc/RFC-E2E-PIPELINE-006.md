@@ -327,4 +327,3 @@ Bronze(raw 수집: 노출/행동/정책 + 외부 원문)
 → 2-Stage Re-rank(정형 sparse + multi-task; 비용 상한)
 → Post-rank(제약 + 다양성 + 설명)
 → Serving & Logging(정책/노출 로그로 닫힌 루프)
-

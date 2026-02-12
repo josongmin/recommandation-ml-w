@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: wine-rec-localstack
+    ports:
+      - "4566:4566"  # LocalStack Gateway
+      - "4571:4571"  # Legacy edge port
+    environment:
+      - SERVICES=s3,dynamodb,kinesis,lambda,stepfunctions,glue
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+      - LAMBDA_EXECUTOR=docker
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "./localstack-init:/etc/localstack/init/ready.d"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "localstack-data:/tmp/localstack"
+    networks:
+      - wine-rec-network
+
+volumes:
+  localstack-data:
+
+networks:
+  wine-rec-network:
+    driver: bridge

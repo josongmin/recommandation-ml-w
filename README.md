@@ -14,12 +14,26 @@ just setup
 # Run checks
 just check
 
-# Run tests
+# Run tests (382 tests, 63% coverage)
 just test
+
+# Run E2E tests with LocalStack
+./scripts/run_e2e_tests.sh
 
 # Start API locally
 just serve
 ```
+
+## Test Status
+
+| Category | Count | Status | Coverage |
+|----------|-------|--------|----------|
+| Unit Tests | 376 | ✅ 368 passed, 8 skipped | 63% |
+| Integration Tests | 8 | ✅ 8 passed | - |
+| E2E Tests | 6 | ⚡ LocalStack required | - |
+| **Total** | **390** | **✅ 384 passed** | **63%** |
+
+See [TESTING.md](TESTING.md) for details.
 
 ## Architecture
 

@@ -102,7 +102,7 @@ class FTRLProximal:
     def update(
         self,
         *,
-        features: NDArray[np.float64],
+        features: NDArray[np.float64],  # noqa: ARG002 - needed for protocol compatibility
         gradient: NDArray[np.float64],
     ) -> None:
         """Update weights with new gradient.
@@ -229,7 +229,7 @@ class MiniBatchOnlineLearner:
         n_examples = len(self._buffer)
         n_features = self.optimizer.n_features
 
-        X = np.zeros((n_examples, n_features), dtype=np.float64)
+        feature_matrix = np.zeros((n_examples, n_features), dtype=np.float64)
         y = np.zeros(n_examples, dtype=np.float64)
         weights = np.zeros(n_examples, dtype=np.float64)
 
@@ -238,18 +238,18 @@ class MiniBatchOnlineLearner:
             for feature_name, value in example.features.items():
                 # Hash feature name to index (production uses feature hashing)
                 feature_idx = hash(feature_name) % n_features
-                X[i, feature_idx] = value
+                feature_matrix[i, feature_idx] = value
 
             y[i] = example.label
             weights[i] = example.weight / example.propensity  # IPS weighting
 
         # Compute gradients (logistic regression loss)
         for i in range(n_examples):
-            pred = self.optimizer.predict(features=X[i])
+            pred = self.optimizer.predict(features=feature_matrix[i])
             prob = 1.0 / (1.0 + np.exp(-pred))  # Sigmoid
-            gradient = (prob - y[i]) * X[i] * weights[i]
+            gradient = (prob - y[i]) * feature_matrix[i] * weights[i]
 
-            self.optimizer.update(features=X[i], gradient=gradient)
+            self.optimizer.update(features=feature_matrix[i], gradient=gradient)
 
         # Clear buffer
         self._buffer.clear()

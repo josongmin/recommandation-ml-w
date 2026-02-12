@@ -182,4 +182,3 @@ Exploration-aware ranker
 15) **Long-horizon 승자 판정 규칙 초안 작성** (7일/30일 재구매율 하락 = 배포 불가)
 16) **dataset_manifest diff tool 1차 구현**
 17) **parity diff histogram 리포트 자동 생성 + drift 원인 자동 분류 도입**
-

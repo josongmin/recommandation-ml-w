@@ -25,7 +25,7 @@ log = get_logger(__name__)
 
 def _cmd_train(args: argparse.Namespace) -> None:
     """Handle ``wine-rec train``."""
-    from wine_rec.models.training.trainer import train  # noqa: PLC0415
+    from wine_rec.models.training.trainer import train
 
     metrics = train(
         model_name=args.model,
@@ -43,7 +43,7 @@ def _cmd_train(args: argparse.Namespace) -> None:
 
 def _cmd_evaluate(args: argparse.Namespace) -> None:
     """Handle ``wine-rec evaluate``."""
-    from wine_rec.models.evaluation.evaluator import run_benchmark_suite  # noqa: PLC0415
+    from wine_rec.models.evaluation.evaluator import run_benchmark_suite
 
     results = run_benchmark_suite(
         model_name=args.model,
@@ -53,7 +53,7 @@ def _cmd_evaluate(args: argparse.Namespace) -> None:
     log.info("evaluate_complete", n_tracks=len(results))
 
     if args.output_dir:
-        from wine_rec.models.evaluation.report import build_report, export_report  # noqa: PLC0415
+        from wine_rec.models.evaluation.report import build_report, export_report
 
         report = build_report(benchmark_results=results)
         path = export_report(report, output_dir=args.output_dir)
@@ -63,7 +63,7 @@ def _cmd_evaluate(args: argparse.Namespace) -> None:
 def _cmd_serve(args: argparse.Namespace) -> None:
     """Handle ``wine-rec serve``."""
     try:
-        import uvicorn  # noqa: PLC0415
+        import uvicorn
     except ImportError:
         log.error("uvicorn_not_installed")
         sys.exit(1)

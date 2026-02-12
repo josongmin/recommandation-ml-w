@@ -28,4 +28,3 @@ Realtime pipeline (this set)
   - `rfc/RFC-FEATURE-MANIFEST-010__Feature-Manifest-and-Parity-Gate-v1.md`
 - RFC-DATASET-BUILDER-011:
   - `rfc/RFC-DATASET-BUILDER-011__Impression-Centric-Dataset-Builder-v1.md`
-

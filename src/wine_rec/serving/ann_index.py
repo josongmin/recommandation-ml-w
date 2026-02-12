@@ -13,12 +13,13 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
-from numpy.typing import NDArray
 
 from wine_rec.common.logging import get_logger
 
 
 if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
     from wine_rec.contracts.object_store import ObjectStore
 
 
@@ -278,7 +279,7 @@ class ANNIndex:
 
         # Load item_ids mapping
         with (path / "item_ids.pkl").open("rb") as f:
-            self._item_ids = pickle.load(f)  # noqa: S301
+            self._item_ids = pickle.load(f)
 
         log.info("ann_index_loaded", path=str(path), n_items=len(self._item_ids))
 

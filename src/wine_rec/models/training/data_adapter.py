@@ -5,17 +5,13 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import numpy as np
-import polars
+import polars as pl
 import torch
 
 from wine_rec.common.logging import get_logger
 
-
-if TYPE_CHECKING:
-    import polars as pl
 
 log = get_logger(__name__)
 
@@ -62,12 +58,12 @@ def _read_parquet(path: str) -> pl.DataFrame:
     """Read a parquet file or first parquet in a directory."""
     p = Path(path)
     if p.is_file():
-        return polars.read_parquet(p)
+        return pl.read_parquet(p)
     parquet_files = list(p.rglob("*.parquet"))
     if not parquet_files:
         msg = f"No parquet files found in {path}"
         raise FileNotFoundError(msg)
-    return polars.read_parquet(parquet_files[0])
+    return pl.read_parquet(parquet_files[0])
 
 
 def load_interaction_data(path: str, split: str = "train") -> InteractionData:
@@ -78,18 +74,16 @@ def load_interaction_data(path: str, split: str = "train") -> InteractionData:
         split: One of "train", "val", "test".
     """
     full_df = _read_parquet(path)
-    df = full_df.filter(polars.col("split") == split)
+    df = full_df.filter(pl.col("split") == split)
     user_map, item_map = build_id_maps(full_df)
 
     user_idx = [user_map[u] for u in df["user_id"].to_list()]
     item_idx = [item_map[i] for i in df["wine_sku_id"].to_list()]
     labels = df["label"].to_list()
 
-    ts_col: list[int]
-    if "shown_ts" in df.columns:
-        ts_col = df["shown_ts"].cast(polars.Int64).to_list()
-    else:
-        ts_col = [0] * len(df)
+    ts_col: list[int] = (
+        df["shown_ts"].cast(pl.Int64).to_list() if "shown_ts" in df.columns else [0] * len(df)
+    )
 
     log.info(
         "loaded_interaction_data",
@@ -193,7 +187,7 @@ def load_feature_data(
     If feature_path is None, constructs minimal features (user_id, item_id).
     """
     full_df = _read_parquet(path)
-    df = full_df.filter(polars.col("split") == split)
+    df = full_df.filter(pl.col("split") == split)
     user_map, item_map = build_id_maps(full_df)
 
     user_idx = [user_map[u] for u in df["user_id"].to_list()]

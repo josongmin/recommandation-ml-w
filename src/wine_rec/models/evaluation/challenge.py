@@ -216,7 +216,7 @@ def update_leaderboard(
     bucket: str = "leaderboard",
 ) -> Leaderboard:
     """Add entry to leaderboard, maintain sorted order by primary_score descending."""
-    import json  # noqa: PLC0415
+    import json
 
     key = f"{entry.track.value}/leaderboard.json"
     existing = get_leaderboard(object_store=object_store, track=entry.track, bucket=bucket)
@@ -264,7 +264,7 @@ def get_leaderboard(
     bucket: str = "leaderboard",
 ) -> Leaderboard:
     """Retrieve current leaderboard for a track."""
-    import json  # noqa: PLC0415
+    import json
 
     key = f"{track.value}/leaderboard.json"
 

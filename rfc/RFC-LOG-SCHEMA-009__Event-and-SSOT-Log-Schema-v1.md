@@ -248,4 +248,3 @@ Counterfactual 평가를 하려면(IPS/SNIPS/DR):
 - dedup key: (event_id) 우선, 없으면 (user_id, event_ts, impression_id, action_type, wine_sku_id) 조합
 - out-of-order window: 2~5분(초기 권장)
 - late event 정책: window 밖 이벤트는 별도 late stream으로 분기하여 지표만 반영(학습 SSOT 반영 여부는 dataset_manifest로 고정)
-

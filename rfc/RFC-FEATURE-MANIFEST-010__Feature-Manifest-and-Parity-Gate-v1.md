@@ -178,4 +178,3 @@ feature_def
     }
   ]
 }
-

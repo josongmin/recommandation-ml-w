@@ -230,10 +230,7 @@ def test_thompson_sampling_convergence() -> None:
     # Simulate 1000 rounds: "good" has 80% success, "bad" has 20%
     for _ in range(1000):
         variant = bandit.select_variant(rng=rng)
-        if variant.variant_id == "good":
-            success = rng.random() < 0.8
-        else:
-            success = rng.random() < 0.2
+        success = rng.random() < 0.8 if variant.variant_id == "good" else rng.random() < 0.2
         bandit.update(variant_id=variant.variant_id, success=success)
 
     stats = bandit.get_statistics()
