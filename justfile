@@ -156,34 +156,34 @@ e2e:
     uv run python scripts/run_e2e_scenario.py
 
 # ════════════════════════════════════════════════
-# Data Pipeline (원클릭 세팅/재세팅)
+# Data Pipeline (Bronze → Silver → Gold → Training)
 # ════════════════════════════════════════════════
 
-# 전체 데이터 파이프라인 초기화 (seed → training dataset)
-data-init:
-    @echo "🚀 데이터 파이프라인 초기화 시작..."
-    PYTHONPATH=src python scripts/seed_data.py --output-dir data --seed 42
-    @echo "✓ Seed data 생성 완료"
-    PYTHONPATH=src python -c "from wine_rec.pipeline.dataset_builder import build_training_examples; build_training_examples(dataset_version='ds_v1', feature_set_version='fs_v1', seed=42, data_root='data', output_root='data/training')"
-    @echo "✓ Training dataset 생성 완료"
-    @echo "✅ 데이터 파이프라인 초기화 완료"
+# Generate seed data (Bronze + Gold-A only)
+seed:
+    uv run python scripts/seed_data.py --output-dir data --seed 42
 
-# 데이터 전체 삭제 (clean slate)
+# Run complete pipeline (Bronze → Gold-B → Training)
+pipeline:
+    uv run python scripts/run_pipeline.py --seed 42
+
+# Run pipeline without re-generating seed data
+pipeline-fast:
+    uv run python scripts/run_pipeline.py --skip-seed
+
+# Clean all data
 data-clean:
-    @echo "🗑️  데이터 삭제 중..."
+    @echo "🗑️  Cleaning all data..."
     rm -rf data/
-    @echo "✓ 데이터 삭제 완료"
+    @echo "✓ Data cleaned"
 
-# 데이터 재생성 (clean → init)
-data-reset: data-clean data-init
-    @echo "✅ 데이터 재생성 완료"
+# Reset pipeline (clean + run)
+data-reset: data-clean pipeline
+    @echo "✅ Pipeline reset complete"
 
-# 학습 데이터만 재생성 (seed data 유지)
-data-retrain:
-    @echo "🔄 학습 데이터 재생성 중..."
-    rm -rf data/training/
-    PYTHONPATH=src python -c "from wine_rec.pipeline.dataset_builder import build_training_examples; build_training_examples(dataset_version='ds_v1', feature_set_version='fs_v1', seed=42, data_root='data', output_root='data/training')"
-    @echo "✅ 학습 데이터 재생성 완료"
+# Legacy aliases (deprecated, use pipeline instead)
+data-init: pipeline
+data-retrain: pipeline-fast
 
 # 데이터 통계 확인
 data-stats:

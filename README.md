@@ -11,14 +11,14 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 # Setup dev environment
 just setup
 
+# Generate data & train
+just pipeline      # Bronze → Gold → Training dataset (54K examples)
+
 # Run checks
 just check
 
-# Run tests (382 tests, 63% coverage)
+# Run tests (365 passed, 63% coverage)
 just test
-
-# Run E2E tests with LocalStack
-./scripts/run_e2e_tests.sh
 
 # Start API locally
 just serve
@@ -52,22 +52,41 @@ src/wine_rec/
 └── common/       # Config, logging
 ```
 
-## E2E Pipeline
+## Data Pipeline (RFC-E2E-PIPELINE-006)
 
-**Phase 1-2: Data Collection & ETL** (Automated)
-- API Gateway → Lambda → Kinesis → Firehose → S3 Bronze (Real-time)
-- EventBridge (daily 01:00 UTC) → Step Functions → Glue Jobs (Bronze→Silver→Gold-A→Gold-B→Dataset)
+### 3-Layer Architecture
 
-**Phase 3-4: Training & Feature Materialization** (scripts/)
-```bash
-scripts/e2e_training.sh           # Full training pipeline
-scripts/deploy_serving.sh v1      # Deploy serving (Fargate + ALB)
+```
+data/
+├── bronze/     # Raw events (15K impressions, 10K actions, 1.2K orders)
+├── gold_a/     # SSOT masters (500 wines, 1.5K SKUs, 5K reviews)
+├── gold_b/     # IR features (review_agg, temporal, scarcity)
+└── training/   # Training dataset (54,865 examples, 70/15/15 split)
 ```
 
-**Phase 5-6: Serving** (Deployed)
-- Client → ALB → Fargate (Feature lookup + Model inference + ANN search)
+### Pipeline Commands
 
-See [/tmp/e2e_pipeline.md](/tmp/e2e_pipeline.md) for detailed flow.
+```bash
+# Generate all data layers
+just pipeline
+
+# Seed data only (Bronze + Gold)
+just seed
+
+# Training dataset only (skip seed)
+just pipeline-fast
+
+# Reset everything
+just data-reset
+```
+
+### Dataset Statistics
+
+- **Total examples**: 54,865
+- **Positive rate**: 19.23%
+- **Labels**: none(81%) → view(8%) → click(7%) → wishlist/cart(2%) → purchase(2%)
+- **Quality gates**: ✅ Leakage=0.0, Join=1.0
+- **Principles**: Impression-centric, Time-travel join, Lineage 3-key
 
 ## Tech Stack
 
