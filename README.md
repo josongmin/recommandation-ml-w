@@ -2,18 +2,19 @@
 
 # Wine Recommendation Pipeline
 
-An ML recommendation workspace connecting event ingestion, feature engineering, model training, evaluation, and serving. The Python implementation uses explicit schemas and ports/adapters around a layered data pipeline.
+<p align="center"><a href="#engineering-highlights">Engineering</a> · <a href="#data-to-recommendation-flow">Architecture</a> · <a href="#start-locally">Get started</a> · <a href="#repository-map">Reference</a></p>
 
+An ML recommendation workspace connecting event ingestion, feature engineering, model training, evaluation, and serving. The Python implementation uses explicit schemas and ports/adapters around a layered data pipeline.
 
 ## Engineering highlights
 
-| Mechanism | Engineering purpose |
-| :--- | :--- |
-| **Impression-centric datasets** | Data-building contracts organize events, labels, temporal joins, and lineage around impressions. |
-| **Versioned features and models** | Feature manifests and model-registry interfaces expose dataset/feature/model identity across training and serving. |
-| **Layered data pipeline** | Bronze events, Gold masters/derived features, and training data have distinct storage and transformation roles. |
-| **Ports for infrastructure** | Storage and model-registry contracts separate core workflows from AWS adapters. |
-| **Typed serving interface** | FastAPI recommendation responses include model and feature-set versions alongside ranked items. |
+| Mechanism | Engineering purpose | Source |
+| :--- | :--- | :--- |
+| **Impression-centric datasets** | Data-building contracts organize events, labels, temporal joins, and lineage around impressions. | [Dataset contract](rfc/RFC-DATASET-BUILDER-011__Impression-Centric-Dataset-Builder-v1.md) |
+| **Versioned features and models** | Feature manifests and model-registry interfaces expose dataset/feature/model identity across training and serving. | [Feature manifest](src/wine_rec/features/manifest/) |
+| **Layered data pipeline** | Bronze events, Gold masters/derived features, and training data have distinct storage and transformation roles. | [Pipeline](src/wine_rec/pipeline/) |
+| **Ports for infrastructure** | Storage and model-registry contracts separate core workflows from AWS adapters. | [Ports](src/wine_rec/contracts/) |
+| **Typed serving interface** | FastAPI recommendation responses include model and feature-set versions alongside ranked items. | [Serving API](src/wine_rec/serving/app.py) |
 
 ## Data-to-recommendation flow
 
@@ -86,3 +87,5 @@ The repository contains implementation, synthetic data, and tests. Historical te
 - [Design RFC index](rfc/README.md)
 - [Package and dependency configuration](pyproject.toml)
 - [Seed generator](scripts/seed_data.py)
+
+<p align="center"><sub><a href="https://github.com/josongmin">Project map</a> · <a href="#engineering-highlights">Back to overview</a></sub></p>
