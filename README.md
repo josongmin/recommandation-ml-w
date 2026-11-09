@@ -1,105 +1,75 @@
-# rec-ml
+# Wine Recommendation Pipeline
 
-Production-Grade ML Recommendation System.
+An ML recommendation workspace connecting event ingestion, feature engineering, model training, evaluation, and serving. The Python implementation uses explicit schemas and ports/adapters around a layered data pipeline.
 
-## Quick Start
+## Data-to-recommendation flow
 
-```bash
-# Install uv (if not installed)
-curl -LsSf https://astral.sh/uv/install.sh | sh
+```mermaid
+flowchart LR
+    EVENTS[Impressions / actions / orders] --> BRONZE[Bronze events]
+    MASTER[Wine / SKU / review masters] --> GOLD[Gold master data]
+    BRONZE --> FEATURES[Temporal and behavioral features]
+    GOLD --> FEATURES
+    FEATURES --> TRAIN[Training and evaluation]
+    TRAIN --> SERVE[Recommendation API]
+```
 
-# Setup dev environment
+The seed generator creates synthetic user profiles, reviews, and events for local development. Checked-in sample data is distinct from live customer traffic or production recommendation quality.
+
+## Repository map
+
+| Path | Responsibility |
+| --- | --- |
+| `src/wine_rec/schemas` | Typed event and data contracts |
+| `src/wine_rec/contracts` | Shared interfaces |
+| `src/wine_rec/ingestion` | Event collection and validation |
+| `src/wine_rec/pipeline` | Batch transformations and training data |
+| `src/wine_rec/features` | Feature construction and parity checks |
+| `src/wine_rec/models` | Baselines, training, and evaluation |
+| `src/wine_rec/serving` | FastAPI recommendation service |
+| `src/wine_rec/infra` | AWS adapters |
+| [scripts/seed_data.py](scripts/seed_data.py) | Reproducible local data generation |
+
+## Start locally
+
+Use Python 3.11+, uv, and Just. Select the ML dependencies required by the workflow rather than assuming every optional model stack is installed.
+
+```sh
 just setup
-
-# Generate data & train
-just pipeline      # Bronze → Gold → Training dataset (54K examples)
-
-# Run checks
+just pipeline
 just check
-
-# Run tests (365 passed, 63% coverage)
 just test
-
-# Start API locally
 just serve
 ```
 
-## Test Status
+`just pipeline` generates Bronze/Gold data and builds training inputs. For narrower work:
 
-| Category | Count | Status | Coverage |
-|----------|-------|--------|----------|
-| Unit Tests | 376 | ✅ 368 passed, 8 skipped | 63% |
-| Integration Tests | 8 | ✅ 8 passed | - |
-| E2E Tests | 6 | ⚡ LocalStack required | - |
-| **Total** | **390** | **✅ 384 passed** | **63%** |
-
-See [TESTING.md](TESTING.md) for details.
-
-## Architecture
-
-**Modular Monolith + Ports & Adapters (lightweight)**
-
-```
-src/wine_rec/
-├── schemas/      # Shared Kernel: data contracts (RFC → code)
-├── contracts/    # Shared Kernel: interface protocols
-├── infra/        # AWS adapters (DynamoDB, S3, Kinesis)
-├── ingestion/    # Event collection + validation
-├── pipeline/     # Batch ETL (Bronze → Silver → Gold)
-├── features/     # Feature engineering + parity gate
-├── models/       # ML baselines + training + evaluation
-├── serving/      # FastAPI recommendation API
-└── common/       # Config, logging
-```
-
-## Data Pipeline (RFC-E2E-PIPELINE-006)
-
-### 3-Layer Architecture
-
-```
-data/
-├── bronze/     # Raw events (15K impressions, 10K actions, 1.2K orders)
-├── gold_a/     # SSOT masters (500 wines, 1.5K SKUs, 5K reviews)
-├── gold_b/     # IR features (review_agg, temporal, scarcity)
-└── training/   # Training dataset (54,865 examples, 70/15/15 split)
-```
-
-### Pipeline Commands
-
-```bash
-# Generate all data layers
-just pipeline
-
-# Seed data only (Bronze + Gold)
+```sh
 just seed
-
-# Training dataset only (skip seed)
 just pipeline-fast
-
-# Reset everything
-just data-reset
 ```
 
-### Dataset Statistics
+The pipeline follows impression-centered labels, temporal joins, and explicit lineage. Local generated-data results do not establish production ranking quality or leakage safety on a different dataset.
 
-- **Total examples**: 54,865
-- **Positive rate**: 19.23%
-- **Labels**: none(81%) → view(8%) → click(7%) → wishlist/cart(2%) → purchase(2%)
-- **Quality gates**: ✅ Leakage=0.0, Join=1.0
-- **Principles**: Impression-centric, Time-travel join, Lineage 3-key
+## Tooling and environments
 
-## Tech Stack
+| Area | Tooling |
+| --- | --- |
+| Python environment | uv |
+| Formatting/lint | Ruff |
+| Types | basedpyright |
+| Tests | pytest |
+| Models | PyTorch and optional recommendation/graph libraries |
+| Serving | FastAPI |
+| Infrastructure | AWS adapters and Terraform material |
 
-- **Language**: Python 3.11+
-- **Package Manager**: uv
-- **Lint/Format**: ruff
-- **Type Check**: basedpyright
-- **Test**: pytest
-- **Task Runner**: just
-- **ML**: PyTorch + RecBole + PyG
-- **Serving**: FastAPI on Fargate Spot
-- **Infra**: AWS Serverless-first (Terraform)
+E2E infrastructure tests require the services described by the test setup, including LocalStack where selected. Cloud training/deployment additionally requires explicit AWS configuration and permissions.
 
-## RFCs
+## Status and documentation
 
-See [rfc/README.md](rfc/README.md) for the full design document index.
+The repository contains implementation, synthetic data, and tests. Historical test counts and coverage percentages are snapshot-specific; use a fresh result from the selected configuration rather than treating this README as a release receipt.
+
+- [Testing](TESTING.md)
+- [Design RFC index](rfc/README.md)
+- [Package and dependency configuration](pyproject.toml)
+- [Seed generator](scripts/seed_data.py)
