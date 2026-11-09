@@ -1,6 +1,19 @@
+<p align="center"><img src="readme-banner.svg" alt="Wine Recommendation ML — Versioned data, feature contracts, and recommendation-serving workflows." width="100%"></p>
+
 # Wine Recommendation Pipeline
 
 An ML recommendation workspace connecting event ingestion, feature engineering, model training, evaluation, and serving. The Python implementation uses explicit schemas and ports/adapters around a layered data pipeline.
+
+
+## Engineering highlights
+
+| Mechanism | Engineering purpose |
+| :--- | :--- |
+| **Impression-centric datasets** | Data-building contracts organize events, labels, temporal joins, and lineage around impressions. |
+| **Versioned features and models** | Feature manifests and model-registry interfaces expose dataset/feature/model identity across training and serving. |
+| **Layered data pipeline** | Bronze events, Gold masters/derived features, and training data have distinct storage and transformation roles. |
+| **Ports for infrastructure** | Storage and model-registry contracts separate core workflows from AWS adapters. |
+| **Typed serving interface** | FastAPI recommendation responses include model and feature-set versions alongside ranked items. |
 
 ## Data-to-recommendation flow
 
